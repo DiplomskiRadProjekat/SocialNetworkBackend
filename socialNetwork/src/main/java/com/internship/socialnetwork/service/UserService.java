@@ -31,4 +31,5 @@ public interface UserService {
 
     List<UserDTO> findConnectedUsers();
 
+    void setUid(Long id, String uid);
 }

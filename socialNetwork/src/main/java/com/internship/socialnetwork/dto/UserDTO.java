@@ -28,6 +28,8 @@ public class UserDTO {
 
     private int friendsCount;
 
+    private String uid;
+
     public static UserDTO toUserDTO(User user, int postsCount, int friendsCount) {
         return UserDTO.builder()
                 .id(user.getId())
@@ -38,6 +40,7 @@ public class UserDTO {
                 .phoneNumber(user.getPhoneNumber())
                 .postsCount(postsCount)
                 .friendsCount(friendsCount)
+                .uid(user.getUid())
                 .build();
     }
 

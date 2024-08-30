@@ -103,4 +103,10 @@ public class UserController {
         return new ResponseEntity<>(postService.getAllFriendsPostsForUser(id), HttpStatus.OK);
     }
 
+    @PutMapping(value = "/{id}/uid")
+    public ResponseEntity<Void> setUid(@PathVariable Long id, @RequestParam String uid) {
+        userService.setUid(id, uid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

@@ -101,6 +101,13 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
+    public void setUid(Long id, String uid) {
+        User user = findById(id);
+        user.setUid(uid);
+        userRepository.save(user);
+    }
+
     private User updateUser(User user, UpdateUserDTO updatedUser) {
         user.setEmail(updatedUser.getEmail());
         user.setFirstName(updatedUser.getFirstName());
