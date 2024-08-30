@@ -1,9 +1,12 @@
 package com.internship.socialnetwork.service.impl;
 
+import com.internship.socialnetwork.config.ApplicationConfig;
+import com.internship.socialnetwork.dto.ProfilePictureDTO;
 import com.internship.socialnetwork.dto.UpdateUserDTO;
 import com.internship.socialnetwork.dto.UserDTO;
 import com.internship.socialnetwork.dto.NewUserDTO;
 import com.internship.socialnetwork.exception.BadRequestException;
+import com.internship.socialnetwork.exception.FileUploadException;
 import com.internship.socialnetwork.exception.NotFoundException;
 import com.internship.socialnetwork.model.User;
 import com.internship.socialnetwork.repository.UserRepository;
@@ -11,12 +14,16 @@ import com.internship.socialnetwork.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.internship.socialnetwork.dto.UserDTO.toUserDTO;
 import static com.internship.socialnetwork.model.enumeration.Role.USER;
 import static com.internship.socialnetwork.model.enumeration.Status.OFFLINE;
 import static com.internship.socialnetwork.model.enumeration.Status.ONLINE;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 @Service
@@ -30,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final ApplicationConfig appConfig;
 
     @Override
     public UserDTO create(NewUserDTO newUserDTO) {
@@ -106,6 +115,32 @@ public class UserServiceImpl implements UserService {
         User user = findById(id);
         user.setUid(uid);
         userRepository.save(user);
+    }
+
+    @Override
+    public void setProfilePicture(Long id, ProfilePictureDTO profilePicture) {
+        User user = findById(id);
+        MultipartFile file = profilePicture.getFile();
+        if (file != null) {
+            try {
+                String filePath = appConfig.getFilesPath() + file.getOriginalFilename();
+                file.transferTo(new File(filePath));
+                user.setProfilePicturePath(filePath);
+                userRepository.save(user);
+            } catch (IOException ex) {
+                throw new FileUploadException("File upload failed: " + ex.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public byte[] downloadProfilePicture(Long id) {
+        User user = findById(id);
+        try {
+            return Files.readAllBytes(new File(user.getProfilePicturePath()).toPath());
+        } catch (IOException ex) {
+            throw new BadRequestException("Downloading profile picture failed.");
+        }
     }
 
     private User updateUser(User user, UpdateUserDTO updatedUser) {

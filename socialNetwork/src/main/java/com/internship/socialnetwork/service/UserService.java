@@ -1,5 +1,6 @@
 package com.internship.socialnetwork.service;
 
+import com.internship.socialnetwork.dto.ProfilePictureDTO;
 import com.internship.socialnetwork.dto.UpdateUserDTO;
 import com.internship.socialnetwork.dto.UserDTO;
 import com.internship.socialnetwork.dto.NewUserDTO;
@@ -32,4 +33,9 @@ public interface UserService {
     List<UserDTO> findConnectedUsers();
 
     void setUid(Long id, String uid);
+
+    void setProfilePicture(Long id, ProfilePictureDTO profilePicture);
+
+    byte[] downloadProfilePicture(Long id);
+
 }

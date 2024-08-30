@@ -1,10 +1,6 @@
 package com.internship.socialnetwork.controller;
 
-import com.internship.socialnetwork.dto.FriendRequestDTO;
-import com.internship.socialnetwork.dto.NewPostDTO;
-import com.internship.socialnetwork.dto.PostDTO;
-import com.internship.socialnetwork.dto.UpdateUserDTO;
-import com.internship.socialnetwork.dto.UserDTO;
+import com.internship.socialnetwork.dto.*;
 import com.internship.socialnetwork.model.ChatMessage;
 import com.internship.socialnetwork.model.enumeration.FriendRequestStatus;
 import com.internship.socialnetwork.service.ChatMessageService;
@@ -107,6 +103,17 @@ public class UserController {
     public ResponseEntity<Void> setUid(@PathVariable Long id, @RequestParam String uid) {
         userService.setUid(id, uid);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/{id}/profile-picture")
+    public ResponseEntity<Void> setProfilePicture(@PathVariable Long id, @ModelAttribute ProfilePictureDTO profilePicture) {
+        userService.setProfilePicture(id, profilePicture);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/{id}/profile-picture")
+    public ResponseEntity<?> downloadProfilePicture(@PathVariable Long id) {
+        return new ResponseEntity<>(userService.downloadProfilePicture(id), HttpStatus.OK);
     }
 
 }
