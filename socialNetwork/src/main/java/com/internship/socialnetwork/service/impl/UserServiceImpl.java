@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
         MultipartFile file = profilePicture.getFile();
         if (file != null) {
             try {
-                String filePath = appConfig.getFilesPath() + file.getOriginalFilename();
+                String filePath = appConfig.getFilesPath() + "users/" + file.getOriginalFilename();
                 file.transferTo(new File(filePath));
                 user.setProfilePicturePath(filePath);
                 userRepository.save(user);
@@ -136,11 +136,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public byte[] downloadProfilePicture(Long id) {
         User user = findById(id);
-        try {
-            return Files.readAllBytes(new File(user.getProfilePicturePath()).toPath());
-        } catch (IOException ex) {
-            throw new BadRequestException("Downloading profile picture failed.");
+        if (user.getProfilePicturePath() != null) {
+            try {
+                return Files.readAllBytes(new File(user.getProfilePicturePath()).toPath());
+            } catch (IOException ex) {
+                throw new BadRequestException("Downloading profile picture failed.");
+            }
         }
+        return null;
     }
 
     private User updateUser(User user, UpdateUserDTO updatedUser) {

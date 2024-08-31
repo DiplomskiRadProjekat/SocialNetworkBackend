@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,8 +21,6 @@ public class NewPostDTO {
     @NotBlank
     @Size(max = 1000, message = "can have maximum 1000 characters")
     private String description;
-
-    private MultipartFile file;
 
     public static Post toPost(User user, NewPostDTO newPostDTO) {
         return Post.builder()

@@ -1,9 +1,6 @@
 package com.internship.socialnetwork.service;
 
-import com.internship.socialnetwork.dto.CommentDTO;
-import com.internship.socialnetwork.dto.NewPostDTO;
-import com.internship.socialnetwork.dto.PostDTO;
-import com.internship.socialnetwork.dto.UpdatePostDTO;
+import com.internship.socialnetwork.dto.*;
 import com.internship.socialnetwork.model.Post;
 
 import java.util.List;
@@ -25,5 +22,9 @@ public interface PostService {
     List<CommentDTO> getAllCommentsForPost(Long id);
 
     List<PostDTO> getAllFriendsPostsForUser(Long id);
+
+    void setImageToPost(Long id, PostImageDTO postImage);
+
+    byte[] downloadImage(String path);
 
 }

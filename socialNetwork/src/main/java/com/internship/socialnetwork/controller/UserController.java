@@ -74,7 +74,7 @@ public class UserController {
 
     @PostMapping(value = "/{id}/posts")
     @PreAuthorize("@authServiceImpl.hasAccess(#id)")
-    public ResponseEntity<PostDTO> create(@PathVariable Long id, @Valid @ModelAttribute NewPostDTO newPostDTO) {
+    public ResponseEntity<PostDTO> create(@PathVariable Long id, @Valid @RequestBody NewPostDTO newPostDTO) {
         return new ResponseEntity<>(postService.create(id, newPostDTO), HttpStatus.CREATED);
     }
 

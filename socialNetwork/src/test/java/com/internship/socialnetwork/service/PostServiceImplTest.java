@@ -6,11 +6,9 @@ import com.internship.socialnetwork.dto.PostDTO;
 import com.internship.socialnetwork.dto.UpdatePostDTO;
 import com.internship.socialnetwork.exception.NotFoundException;
 import com.internship.socialnetwork.model.Comment;
-import com.internship.socialnetwork.model.FileData;
 import com.internship.socialnetwork.model.Post;
 import com.internship.socialnetwork.model.User;
 import com.internship.socialnetwork.repository.PostRepository;
-import com.internship.socialnetwork.service.impl.FileDataServiceImpl;
 import com.internship.socialnetwork.service.impl.PostServiceImpl;
 import com.internship.socialnetwork.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -57,9 +55,6 @@ class PostServiceImplTest {
     @Mock
     private UserServiceImpl userService;
 
-    @Mock
-    private FileDataServiceImpl fileDataService;
-
     @InjectMocks
     private PostServiceImpl postService;
 
@@ -70,12 +65,10 @@ class PostServiceImplTest {
         NewPostDTO newPostDTO = createNewPostDTO(createMultipartFiles());
         User user = createUser();
         Post post = createPost(user, createdAt);
-        FileData fileData = createFileData(post);
         PostDTO postDTO = createPostDTO(createdAt, createFileNames());
 
         when(userService.findById(any())).thenReturn(user);
         when(postRepository.save(any())).thenReturn(post);
-        when(fileDataService.create(any(), any())).thenReturn(fileData);
 
         // when
         PostDTO savedPost = postService.create(USER_ID, newPostDTO);
@@ -86,7 +79,6 @@ class PostServiceImplTest {
         // and
         verify(userService).findById(any());
         verify(postRepository).save(any());
-        verify(fileDataService).create(any(), any());
     }
 
     @Test
@@ -110,7 +102,6 @@ class PostServiceImplTest {
         // and
         verify(userService).findById(any());
         verify(postRepository).save(any());
-        verify(fileDataService, never()).create(any(), any());
     }
 
     @Test
@@ -139,8 +130,6 @@ class PostServiceImplTest {
         LocalDateTime createdAt = LocalDateTime.now();
         User user = createUser();
         Post post = createPost(user, createdAt);
-        FileData fileData = createFileData(post);
-        post.setFiles(List.of(fileData));
         List<Post> posts = List.of(post);
         PostDTO postDTO = createPostDTO(createdAt, createFileNames());
         List<PostDTO> expectedPosts = new ArrayList<>();
@@ -164,8 +153,6 @@ class PostServiceImplTest {
         User user = User.builder().id(USER_ID).build();
         LocalDateTime postedAt = LocalDateTime.now();
         Post post = createPost(user, postedAt);
-        FileData fileData = createFileData(post);
-        post.setFiles(List.of(fileData));
         PostDTO postDTO = createPostDTO(postedAt, createFileNames());
 
         when(postRepository.findById(any())).thenReturn(Optional.of(post));
@@ -304,7 +291,6 @@ class PostServiceImplTest {
                 .description(TEST_DESCRIPTION)
                 .postedAt(createdAt)
                 .comments(new ArrayList<>())
-                .files(new ArrayList<>())
                 .build();
     }
 
@@ -319,22 +305,13 @@ class PostServiceImplTest {
         return PostDTO.builder()
                 .userId(USER_ID)
                 .description(TEST_DESCRIPTION)
-                .files(files)
-                .postedAt(createdAt)
+                .postedAt(String.valueOf(createdAt))
                 .comments(new ArrayList<>())
                 .build();
     }
 
     private List<String> createFileNames() {
         return List.of(FILE_NAME);
-    }
-
-    private FileData createFileData(Post post) {
-        return FileData.builder()
-                .post(post)
-                .name(FILE_NAME)
-                .type(FILE_TYPE)
-                .build();
     }
 
     private List<MultipartFile> createMultipartFiles() {
@@ -348,7 +325,6 @@ class PostServiceImplTest {
     private NewPostDTO createNewPostDTO(List<MultipartFile> files) {
         return  NewPostDTO.builder()
                 .description(TEST_DESCRIPTION)
-                .files(files)
                 .build();
     }
 

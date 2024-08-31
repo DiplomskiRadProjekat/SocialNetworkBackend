@@ -1,25 +1,25 @@
 package com.internship.socialnetwork.service.impl;
 
-import com.internship.socialnetwork.dto.CommentDTO;
-import com.internship.socialnetwork.dto.NewPostDTO;
-import com.internship.socialnetwork.dto.PostDTO;
-import com.internship.socialnetwork.dto.UpdatePostDTO;
+import com.internship.socialnetwork.config.ApplicationConfig;
+import com.internship.socialnetwork.dto.*;
+import com.internship.socialnetwork.exception.BadRequestException;
+import com.internship.socialnetwork.exception.FileUploadException;
 import com.internship.socialnetwork.exception.NotFoundException;
-import com.internship.socialnetwork.model.FileData;
 import com.internship.socialnetwork.model.Post;
 import com.internship.socialnetwork.repository.PostRepository;
-import com.internship.socialnetwork.service.FileDataService;
 import com.internship.socialnetwork.service.PostService;
 import com.internship.socialnetwork.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 import static com.internship.socialnetwork.dto.NewPostDTO.toPost;
 import static com.internship.socialnetwork.dto.PostDTO.toPostDTO;
-import static com.internship.socialnetwork.dto.PostDTO.toPostDTOWithFile;
 
 @Service
 @RequiredArgsConstructor
@@ -31,17 +31,11 @@ public class PostServiceImpl implements PostService {
 
     private final UserService userService;
 
-    private final FileDataService fileDataService;
+    private final ApplicationConfig appConfig;
 
     @Override
     public PostDTO create(Long userId, NewPostDTO newPostDTO) {
-        Post post = postRepository.save(toPost(userService.findById(userId), newPostDTO));
-        MultipartFile file = newPostDTO.getFile();
-        if (file != null) {
-            FileData fileData = fileDataService.create(file, post);
-            return toPostDTOWithFile(post, fileData);
-        }
-        return toPostDTO(post);
+        return toPostDTO(postRepository.save(toPost(userService.findById(userId), newPostDTO)));
     }
 
     @Override
@@ -87,6 +81,34 @@ public class PostServiceImpl implements PostService {
         return postRepository.findFriendsPostsByUserId(id).stream()
                 .map(PostDTO::toPostDTO)
                 .toList();
+    }
+
+    @Override
+    public void setImageToPost(Long id, PostImageDTO postImage) {
+        Post post = findById(id);
+        MultipartFile file = postImage.getFile();
+        if (file != null) {
+            try {
+                String filePath = appConfig.getFilesPath() + "posts/" + file.getOriginalFilename();
+                file.transferTo(new File(filePath));
+                post.getFilePaths().add(filePath);
+                postRepository.save(post);
+            } catch (IOException ex) {
+                throw new FileUploadException("File upload failed: " + ex.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public byte[] downloadImage(String path) {
+        if (path != null) {
+            try {
+                return Files.readAllBytes(new File(path).toPath());
+            } catch (IOException ex) {
+                throw new BadRequestException("Downloading image failed.");
+            }
+        }
+        return null;
     }
 
 }
